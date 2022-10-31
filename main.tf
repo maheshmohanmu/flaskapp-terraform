@@ -17,8 +17,8 @@ resource "aws_ecs_task_definition" "flaskapp-task" {
   container_definitions    = <<DEFINITION
   [
     {
-      "name": "flaskapp-task",
-      "image": "${aws_ecr_repository.ecr-repo-mahesh.repository_url}",
+      "name": "flaskapp-img",
+      "image": "flaskapp-img",
       "essential": true,
       "portMappings": [
         {
