@@ -12,6 +12,9 @@ resource "aws_ecs_cluster" "flaskapp-cluster" {
   name = "flaskapp-cluster2"
 }
 
+# Below code is not used to provision ECS Task definitions. 
+# Instead Task definitions are created using json file from repo using Gitbub Actions 
+
 resource "aws_ecs_task_definition" "flaskapp-task" {
   family                   = "flaskapp-img2"
   container_definitions    = <<DEFINITION
