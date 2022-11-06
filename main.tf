@@ -50,14 +50,14 @@ resource "aws_ecs_task_definition" "flaskapp-task" {
 }
 
 resource "aws_ecs_service" "flaskapp-service" {
-  name            = "flaskapp-servic2"                             # Naming our first service
+  name            = "flaskapp-servic2"                             # ECS service name
   cluster         = "${aws_ecs_cluster.flaskapp-cluster.id}"             # Referencing our created Cluster
   task_definition = flaskappfam-img3 #"${aws_ecs_task_definition.flaskapp-task.id}" # Referencing the task our service will spin up
   launch_type     = "FARGATE"
-  desired_count   = 2 # Setting the number of containers we want to be deployed to 2
+  desired_count   = 2 # Setting the number of containers we want to be deployed
 
   load_balancer {
-    target_group_arn = "${aws_lb_target_group.target_group.arn}" # Referencing our target group
+    target_group_arn = "${aws_lb_target_group.target_group.arn}" # Referencing our ALB target group
     container_name   = "${aws_ecs_task_definition.flaskapp-task.family}"
     container_port   = 5000 # Specifying the container port
   }
@@ -68,7 +68,7 @@ resource "aws_ecs_service" "flaskapp-service" {
   }
 }
 
-# Security group for ECS service to allow traffic from LB security group
+# Security group for ECS service to allow inbound traffic from ALB security group
 resource "aws_security_group" "service_security_group" {
   ingress {
     from_port = 0
@@ -86,6 +86,7 @@ resource "aws_security_group" "service_security_group" {
   }
 }
 
+#Provisioning ALB to expose our ECS service to outside world
 resource "aws_alb" "application_load_balancer" {
   name               = "flaskapp-ecs-lb"
   load_balancer_type = "application"
@@ -111,6 +112,7 @@ resource "aws_security_group" "load_balancer_security_group" {
   }
 }
 
+#Target Group for ALB which points to ECS containers
 resource "aws_lb_target_group" "target_group" {
   name        = "flaskapp-ecs-lb-tg"
   port        = 80
@@ -135,11 +137,11 @@ resource "aws_lb_listener" "listener" {
   }
 }
 
-data "aws_vpc" "default_vpc" { #Reference data source for default vpc (not terraform managed)
+data "aws_vpc" "default_vpc" { #Reference data source for default vpc (not managed by Terraform)
   default = true
 }
 
-data "aws_subnet_ids" "subnets" { #Reference data source for subnets from default vpc (not terraform managed)
+data "aws_subnet_ids" "subnets" { #Reference data source for subnets from default vpc (not managed by Terraform)
   vpc_id = data.aws_vpc.default_vpc.id
 }
 
